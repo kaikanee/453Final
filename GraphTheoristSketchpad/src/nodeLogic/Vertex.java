@@ -6,11 +6,11 @@ import javafx.scene.paint.Color;
 
 public class Vertex {
 	
-	public int x, y;
+	public double x, y;
 	private Color color;
 	private ArrayList<Edge> edges = new ArrayList<Edge>();
 	
-	public Vertex(int x, int y, Color color)
+	public Vertex(double x, double y, Color color)
 	{
 		this.x = x;
 		this.y = y;

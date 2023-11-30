@@ -20,7 +20,7 @@ public class graphController {
 		setDefaultColor(Color.BLACK);
 	}
 	
-	public void addVertex(int x, int y)
+	public void addVertex(double x, double y)
 	{
 		Vertex vertex = new Vertex(x, y, getDefaultColor());
 		this.vertices.add(vertex);
