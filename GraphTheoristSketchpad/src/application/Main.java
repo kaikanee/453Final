@@ -1,31 +1,19 @@
 package application;
 	
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import nodeLogic.Edge;
 import nodeLogic.Vertex;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 
@@ -33,11 +21,8 @@ import javafx.scene.control.ToggleGroup;
 public class Main extends Application {
 	
 	private graphController Graph = new graphController();
-	// to store the coordinates of the first click for edge drawing and checking if its the first time I clicked
-	private double startX, startY;
-	private boolean isFirstClick = true;
-	private Vertex startEdge = null;
-	private String button;
+	private Vertex startingVertex = null;
+	private String button = "Vertex";
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -60,7 +45,7 @@ public class Main extends Application {
 			RowConstraints rowConstraint = new RowConstraints();
 			Text n = new Text("n = 0");
 			Text m = new Text("m = 0");
-			Text currentButton = new Text("Adding \n Vertex");
+			Text k = new Text("k = 0");
 			
 			// making the buttons a group so only one of them can be pressed at any time
 			addVertex.setToggleGroup(toggleGroup);
@@ -72,7 +57,7 @@ public class Main extends Application {
 			toggleGroup.selectToggle(addVertex);
 			
 			// adding the buttons and text to the vertical box.
-			buttonsVBox = new VBox(10, currentButton,n, m, addVertex, addEdge, paint, remove);
+			buttonsVBox = new VBox(10, n, m, k, addVertex, addEdge, paint, remove);
 			
 			// adding padding to the vertical box
 			vBoxPadding = new Insets(0, 0, 0, 20); // Insets(top, right, bottom, left)
@@ -96,68 +81,70 @@ public class Main extends Application {
 			// Adding the gridPane which hold all the other panels.
 			scene = new Scene(gridPane, 800, 500);
 			
+			// Got this outside of the click event so it doesn't need a click to update but rather does it on its own
+			toggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+			    if (newToggle != null) {
+			        // getting what button is selected
+			        ToggleButton selectedButton = (ToggleButton) newToggle;
+			        button = selectedButton.getText();
+			    }
+			});
+			
 			// Set the double-click event handler
 			drawingArea.setOnMouseClicked(event -> {
-				
-				
-				if (toggleGroup.getSelectedToggle() != null) {
-					// getting what button is selected
-		            ToggleButton selectedButton = (ToggleButton) toggleGroup.getSelectedToggle();
-					button = selectedButton.getText();
-				}
 				if (event.getClickCount() == 2 && button.equals("Vertex")) {
 			        // Double-click detected, draw a new circle at the mouse location
 			        double x = event.getX();
 			        double y = event.getY();
 			        
-			        // This is to reset in case you clicked once in the edge drawing and then left it.
-			        isFirstClick = true;
-			        
 			        // Creating and adding a vertex and adding to graph controller.
 			        Vertex newVertex = new Vertex(x,y, Color.BLACK);
 			        
+			        Graph.addVertex(newVertex);
+			        k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
 			        
-			        // drag and drop the vertex
+			        // drag and drop the vertex only when the vertex button is chosen
 			        newVertex.setOnMouseDragged(event2 ->{
-			        	
-			        	newVertex.setCenterX(event2.getX());
-			        	newVertex.setCenterY(event2.getY());
-			        	newVertex.vertexMoved();
+			        	if (button.equals("Vertex")) {
+			        		
+				        	newVertex.setCenterX(event2.getX());
+				        	newVertex.setCenterY(event2.getY());
+				        	newVertex.vertexMoved();
+			        	}
 			        });
 			        
 			        // adding a new edge
 			        newVertex.setOnMouseClicked(edgeEvent -> {
-			        	if(button.equals("Edge"))
-			        	{
-			        		// this only kind of works idk
-			        		// if we dont have anything selected, select this
-			        		if(startEdge == null)
-				        	{
-				        		startEdge = newVertex;
-				        		newVertex.setFill(Color.DARKRED);
-				        	}
-				        	else //if(startEdge != newVertex)
-				        	{
-				        		Edge newEdge = Graph.addEdge(startEdge, newVertex);
-				        		newEdge.setOnMouseDragged(event3 -> {
-				        			newEdge.setControlPoint(event3.getX(), event3.getY());
-				        		});
-				        		drawingArea.getChildren().add(newEdge);
-				        		newVertex.setFill(Color.BLUE);
-				        		startEdge = null;
-				        	}
-			        	}
-			        	
-			        
+						if(button.equals("Edge"))
+						{
+							// this only kind of works idk
+							// if we dont have anything selected, select this
+							if(startingVertex == null)
+							{
+								startingVertex = newVertex;
+								newVertex.setFill(Color.DARKRED);
+							}
+							else //if(startEdge != newVertex)
+							{
+								Edge newEdge = new Edge(startingVertex, newVertex, Color.BLACK);
+								
+								newEdge.setOnMouseDragged(event3 -> {
+									newEdge.setControlPoint(event3.getX(), event3.getY());
+								});
+								
+								drawingArea.getChildren().add(newEdge);
+								newVertex.setFill(Color.BLUE);
+								Graph.edges.add(newEdge);
+								m.setText("m = " + String.valueOf(Graph.edges.size()));
+								k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
+								startingVertex = null;
+							}
+						}
 			        });
-			        Graph.addVertex(newVertex);
 
-			        n.setText("n= " + String.valueOf(Graph.vertices.size()));
+			        n.setText("n = " + String.valueOf(Graph.vertices.size()));
 			        drawingArea.getChildren().add(newVertex);
 			    }
-				
-	
-			    
 			});
 
 	        // Set up the stage

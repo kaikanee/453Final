@@ -1,6 +1,7 @@
 package nodeLogic;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -22,20 +23,18 @@ public class Vertex extends Circle{
 	}
 	
 	//returns an array of all unique adjacent nodes
-	public Vertex[] getAdjacentVertices()
-	{
-		ArrayList<Vertex> adjacentVertices = new ArrayList<Vertex>(); // maybe just use hashset to avoid collision (parallel edges)
-		for(Edge edge : edges)
-		{
-			for(Vertex node : edge.getEndpoints())
-			{
-				if(!(node == this) && !adjacentVertices.contains(node))
-				{
-					adjacentVertices.add(node);
-				}
-			}
-		}
-		return adjacentVertices.toArray(new Vertex[0]);
+	public HashSet<Vertex> getAdjacentVertices() {
+		
+	    HashSet<Vertex> adjacentVertices = new HashSet<>();
+	    for (Edge edge : edges) {
+	    	
+	        for (Vertex node : edge.getEndpoints()) {
+	            if (!node.equals(this)) {
+	                adjacentVertices.add(node);
+	            }
+	        }
+	    }
+	    return adjacentVertices;
 	}
 	
 	public int getDegree()

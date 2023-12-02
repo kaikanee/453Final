@@ -1,7 +1,6 @@
 package nodeLogic;
 
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.QuadCurveTo;
@@ -37,8 +36,6 @@ public class Edge extends Path{
 		this.getElements().add(startPath);
 		this.getElements().add(endPath);
 		
-		
-
 		this.setStrokeWidth(5);
 		start.addEdge(this);
 		end.addEdge(this);
