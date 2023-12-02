@@ -9,7 +9,6 @@ public class Vertex extends Circle{
 	
 	public double x, y;
 	private final static int SIZE = 25;
-	private Color color;
 	private ArrayList<Edge> edges = new ArrayList<Edge>();
 	
 	public Vertex(double x, double y, Color color)
@@ -45,14 +44,13 @@ public class Vertex extends Circle{
 		return this.edges.size();
 	}
 	
-	public Color getColor()
+	public void vertexMoved()
 	{
-		return this.color;
+		for(Edge edge : this.edges)
+		{
+			edge.handleVertexEvent(this);
+		}
 	}
 	
-	public void setColor(Color color)
-	{
-		this.color = color;
-	}
 
 }

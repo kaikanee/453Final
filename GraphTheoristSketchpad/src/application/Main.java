@@ -36,6 +36,8 @@ public class Main extends Application {
 	// to store the coordinates of the first click for edge drawing and checking if its the first time I clicked
 	private double startX, startY;
 	private boolean isFirstClick = true;
+	private Vertex startEdge = null;
+	private String button;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -96,7 +98,7 @@ public class Main extends Application {
 			
 			// Set the double-click event handler
 			drawingArea.setOnMouseClicked(event -> {
-				String button = null;
+				
 				
 				if (toggleGroup.getSelectedToggle() != null) {
 					// getting what button is selected
@@ -114,43 +116,43 @@ public class Main extends Application {
 			        // Creating and adding a vertex and adding to graph controller.
 			        Vertex newVertex = new Vertex(x,y, Color.BLACK);
 			        
+			        
+			        // drag and drop the vertex
 			        newVertex.setOnMouseDragged(event2 ->{
 			        	
 			        	newVertex.setCenterX(event2.getX());
 			        	newVertex.setCenterY(event2.getY());
+			        	newVertex.vertexMoved();
 			        });
 			        
+			        // adding a new edge
+			        newVertex.setOnMouseClicked(edgeEvent -> {
+			        	if(button.equals("Edge"))
+			        	{
+			        		// this only kind of works idk
+			        		// if we dont have anything selected, select this
+			        		if(startEdge == null)
+				        	{
+				        		startEdge = newVertex;
+				        		newVertex.setFill(Color.DARKRED);
+				        	}
+				        	else if(startEdge != newVertex)
+				        	{
+				        		drawingArea.getChildren().add(Graph.addEdge(startEdge, newVertex));
+				        		newVertex.setFill(Color.BLUE);
+				        		startEdge = null;
+				        	}
+			        	}
+			        	
+			        
+			        });
 			        Graph.addVertex(newVertex);
 
 			        n.setText("n= " + String.valueOf(Graph.vertices.size()));
 			        drawingArea.getChildren().add(newVertex);
 			    }
-				else if(button.equals("Edge")) {
-					if (isFirstClick) {
-		                // First click
-		                startX = event.getX();
-		                startY = event.getY();
-		                isFirstClick = false;
-		            } else {
-		                // Second click
-		                double endX = event.getX();
-		                double endY = event.getY();
-
-		                /* Create a line need to add end point to the edge some way
-		                 * we have to figure out how to select a vertex and then 
-		                 * adding another. Figuring out the center of each and drawing the line
-		                 * to those coordinates. We need to change the line to be and edge instead.
-		                 */
-		                Line line = new Line(startX, startY, endX, endY);
-		                line.setStroke(Color.BLACK);
-
-		                // Add the line to the pane
-		                drawingArea.getChildren().add(line);
-		                
-		                // reset for the next line drawing
-		                isFirstClick = true;
-		            }
-				}
+				
+	
 			    
 			});
 

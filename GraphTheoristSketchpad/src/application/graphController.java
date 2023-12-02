@@ -25,10 +25,11 @@ public class graphController {
 		this.vertices.add(vertex);
 	}
 	
-	public void addEdge(Vertex start, Vertex end)
+	public Edge addEdge(Vertex start, Vertex end)
 	{
 		Edge edge = new Edge(start, end, getDefaultColor());
 		this.edges.add(edge);
+		return edge;
 	}
 
 	public Color getDefaultColor() {
