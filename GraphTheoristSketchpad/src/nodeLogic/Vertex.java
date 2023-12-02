@@ -3,18 +3,18 @@ package nodeLogic;
 import java.util.ArrayList;
 
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 
-public class Vertex {
+public class Vertex extends Circle{
 	
 	public double x, y;
+	private final static int SIZE = 25;
 	private Color color;
 	private ArrayList<Edge> edges = new ArrayList<Edge>();
 	
 	public Vertex(double x, double y, Color color)
 	{
-		this.x = x;
-		this.y = y;
-		this.color = color;
+		super(x,y,SIZE, color);
 	}
 	
 	public void addEdge(Edge edge)

@@ -20,9 +20,8 @@ public class graphController {
 		setDefaultColor(Color.BLACK);
 	}
 	
-	public void addVertex(double x, double y)
+	public void addVertex(Vertex vertex)
 	{
-		Vertex vertex = new Vertex(x, y, getDefaultColor());
 		this.vertices.add(vertex);
 	}
 	

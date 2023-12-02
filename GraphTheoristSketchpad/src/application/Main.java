@@ -20,17 +20,22 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import nodeLogic.Edge;
 import nodeLogic.Vertex;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 
 
 public class Main extends Application {
 	
 	private graphController Graph = new graphController();
-	
+	// to store the coordinates of the first click for edge drawing and checking if its the first time I clicked
+	private double startX, startY;
+	private boolean isFirstClick = true;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -39,9 +44,11 @@ public class Main extends Application {
 			// Test code
 			Label label = new Label("Drawable Surface");
 			Pane drawingArea = new Pane(label);
-			Button addRemoveVertice = new Button("Vertice");
-			Button addRemoveEdge = new Button("Edge");
-			Button paint = new Button ("Paint");
+			ToggleButton addVertex = new ToggleButton("Vertex");
+			ToggleButton addEdge = new ToggleButton("Edge");
+			ToggleButton paint = new ToggleButton("Paint");
+			ToggleButton remove = new ToggleButton("Remove");
+			ToggleGroup toggleGroup = new ToggleGroup();
 			Scene scene;
 			VBox buttonsVBox;
 			Insets vBoxPadding;
@@ -51,9 +58,19 @@ public class Main extends Application {
 			RowConstraints rowConstraint = new RowConstraints();
 			Text n = new Text("n = 0");
 			Text m = new Text("m = 0");
+			Text currentButton = new Text("Adding \n Vertex");
+			
+			// making the buttons a group so only one of them can be pressed at any time
+			addVertex.setToggleGroup(toggleGroup);
+			addEdge.setToggleGroup(toggleGroup);
+			paint.setToggleGroup(toggleGroup);
+			remove.setToggleGroup(toggleGroup);
+			
+			// making the add vertex button be the default clicked
+			toggleGroup.selectToggle(addVertex);
 			
 			// adding the buttons and text to the vertical box.
-			buttonsVBox = new VBox(10, n, m, addRemoveVertice, addRemoveEdge, paint);
+			buttonsVBox = new VBox(10, currentButton,n, m, addVertex, addEdge, paint, remove);
 			
 			// adding padding to the vertical box
 			vBoxPadding = new Insets(0, 0, 0, 20); // Insets(top, right, bottom, left)
@@ -79,47 +96,69 @@ public class Main extends Application {
 			
 			// Set the double-click event handler
 			drawingArea.setOnMouseClicked(event -> {
-			    if (event.getClickCount() == 2) {
+				String button = null;
+				
+				if (toggleGroup.getSelectedToggle() != null) {
+					// getting what button is selected
+		            ToggleButton selectedButton = (ToggleButton) toggleGroup.getSelectedToggle();
+					button = selectedButton.getText();
+				}
+				if (event.getClickCount() == 2 && button.equals("Vertex")) {
 			        // Double-click detected, draw a new circle at the mouse location
 			        double x = event.getX();
 			        double y = event.getY();
 			        
-			        // Add to graph controller
-			        Graph.addVertex(x, y);
+			        // This is to reset in case you clicked once in the edge drawing and then left it.
+			        isFirstClick = true;
 			        
-			        // Using circles to create a new circle
-			        Circle newCircle = new Circle(20, Color.BLACK);
-			        newCircle.setCenterX(x);
-			        newCircle.setCenterY(y);
+			        // Creating and adding a vertex and adding to graph controller.
+			        Vertex newVertex = new Vertex(x,y, Color.BLACK);
+			        
+			        newVertex.setOnMouseDragged(event2 ->{
+			        	
+			        	newVertex.setCenterX(event2.getX());
+			        	newVertex.setCenterY(event2.getY());
+			        });
+			        
+			        Graph.addVertex(newVertex);
 
 			        n.setText("n= " + String.valueOf(Graph.vertices.size()));
-			        drawingArea.getChildren().add(newCircle);
+			        drawingArea.getChildren().add(newVertex);
 			    }
+				else if(button.equals("Edge")) {
+					if (isFirstClick) {
+		                // First click
+		                startX = event.getX();
+		                startY = event.getY();
+		                isFirstClick = false;
+		            } else {
+		                // Second click
+		                double endX = event.getX();
+		                double endY = event.getY();
+
+		                /* Create a line need to add end point to the edge some way
+		                 * we have to figure out how to select a vertex and then 
+		                 * adding another. Figuring out the center of each and drawing the line
+		                 * to those coordinates. We need to change the line to be and edge instead.
+		                 */
+		                Line line = new Line(startX, startY, endX, endY);
+		                line.setStroke(Color.BLACK);
+
+		                // Add the line to the pane
+		                drawingArea.getChildren().add(line);
+		                
+		                // reset for the next line drawing
+		                isFirstClick = true;
+		            }
+				}
+			    
 			});
 
-		        // Set up the stage
-		        primaryStage.setTitle("Graph Maker");
-		        primaryStage.setScene(scene);
-		        primaryStage.show();
+	        // Set up the stage
+	        primaryStage.setTitle("Graph Maker");
+	        primaryStage.setScene(scene);
+	        primaryStage.show();
 			
-			
-			// -------------------------------------------------------------------
-			/*Graph.addVertex(400, 200);
-			Graph.setDefaultColor(Color.RED);
-			Graph.addVertex(200, 400);
-			Graph.addEdge(Graph.vertices.get(0), Graph.vertices.get(1));
-			
-			GridPane test2 = new GridPane();
-			test2.getChildren().addAll(generateGraphCanvas(this.Graph), button);
-			
-			Canvas canvas = new Canvas(800, 500); 
-			canvas.getGraphicsContext2D();
-			Button button = new Button("dfhuiashdouashjdoiahsioudha");
-			
-			Scene scene = new Scene(test2,800,500);
-			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-			*/
-			// --0--0239120-938-921930-9128
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -129,29 +168,4 @@ public class Main extends Application {
 		launch(args);
 	}
 	
-	
-	private Canvas generateGraphCanvas(graphController graph)
-	{
-		Canvas canvas = new Canvas(800, 500); 
-		GraphicsContext graphics = canvas.getGraphicsContext2D();
-		graphics.setStroke(Color.RED);
-		graphics.setLineWidth(2);
-		int index = 0;
-		for(Vertex vertex : graph.vertices)
-		{
-			graphics.setFill(vertex.getColor());
-			graphics.fillOval(vertex.x - 15, vertex.y - 15, 30, 30);
-			graphics.fillText("v" + index, vertex.x + 10, vertex.y + 20);
-			index++;
-			
-		}
-		
-		for(Edge edge : graph.edges)
-		{
-			graphics.setStroke(edge.getColor());
-			graphics.strokeLine(edge.getEndpoints()[0].x, edge.getEndpoints()[0].y, edge.getEndpoints()[1].x, edge.getEndpoints()[1].y);
-			
-		}
-		return canvas;
-	}
 }
