@@ -136,9 +136,13 @@ public class Main extends Application {
 				        		startEdge = newVertex;
 				        		newVertex.setFill(Color.DARKRED);
 				        	}
-				        	else if(startEdge != newVertex)
+				        	else //if(startEdge != newVertex)
 				        	{
-				        		drawingArea.getChildren().add(Graph.addEdge(startEdge, newVertex));
+				        		Edge newEdge = Graph.addEdge(startEdge, newVertex);
+				        		newEdge.setOnMouseDragged(event3 -> {
+				        			newEdge.setControlPoint(event3.getX(), event3.getY());
+				        		});
+				        		drawingArea.getChildren().add(newEdge);
 				        		newVertex.setFill(Color.BLUE);
 				        		startEdge = null;
 				        	}
