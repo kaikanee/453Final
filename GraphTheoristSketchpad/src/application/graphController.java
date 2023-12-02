@@ -4,7 +4,6 @@ package application;
 import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Stack;
 
 import nodeLogic.Edge;
@@ -43,7 +42,7 @@ public class graphController {
 		this.defaultColor = defaultColor;
 	}
 	
-	// finding k components
+	// Finding k components
 	public int findConnectedComponents() {
 		 
 		HashSet<Vertex> visited = new HashSet<>();

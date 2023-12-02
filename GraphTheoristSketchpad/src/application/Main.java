@@ -10,12 +10,14 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import nodeLogic.Edge;
 import nodeLogic.Vertex;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.ColorPicker;
 
 
 public class Main extends Application {
@@ -87,64 +89,124 @@ public class Main extends Application {
 			        // getting what button is selected
 			        ToggleButton selectedButton = (ToggleButton) newToggle;
 			        button = selectedButton.getText();
+			        
+			        if(startingVertex != null) {
+			        	
+			        	vertexDeselected(startingVertex);
+			        	startingVertex = null;
+			        	
+			        }
+			        
+			    }
+			    else {
+			    	
+			    	button = null;
 			    }
 			});
 			
 			// Set the double-click event handler
 			drawingArea.setOnMouseClicked(event -> {
-				if (event.getClickCount() == 2 && button.equals("Vertex")) {
-			        // Double-click detected, draw a new circle at the mouse location
-			        double x = event.getX();
-			        double y = event.getY();
-			        
-			        // Creating and adding a vertex and adding to graph controller.
-			        Vertex newVertex = new Vertex(x,y, Color.BLACK);
-			        
-			        Graph.addVertex(newVertex);
-			        k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
-			        
-			        // drag and drop the vertex only when the vertex button is chosen
-			        newVertex.setOnMouseDragged(event2 ->{
-			        	if (button.equals("Vertex")) {
-			        		
-				        	newVertex.setCenterX(event2.getX());
-				        	newVertex.setCenterY(event2.getY());
-				        	newVertex.vertexMoved();
-			        	}
-			        });
-			        
-			        // adding a new edge
-			        newVertex.setOnMouseClicked(edgeEvent -> {
-						if(button.equals("Edge"))
-						{
-							// this only kind of works idk
-							// if we dont have anything selected, select this
-							if(startingVertex == null)
+				if(button != null) {
+					
+					if (event.getClickCount() == 2 && button.equals("Vertex")) {
+				        // Double-click detected, draw a new circle at the mouse location
+				        double x = event.getX();
+				        double y = event.getY();
+				        
+				        // Creating and adding a vertex and adding to graph controller.
+				        Vertex newVertex = new Vertex(x,y, Color.BLACK);
+				        
+				        Graph.addVertex(newVertex);
+				        k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
+				        
+				        // drag and drop the vertex only when the vertex button is chosen
+				        newVertex.setOnMouseDragged(event2 ->{
+				        	if (button.equals("Vertex")) {
+				        		
+					        	newVertex.setCenterX(event2.getX());
+					        	newVertex.setCenterY(event2.getY());
+					        	newVertex.vertexMoved();
+				        	}
+				        });
+				        
+				        // adding a new edge
+				        newVertex.setOnMouseClicked(edgeEvent -> {
+							if(button.equals("Edge"))
 							{
-								startingVertex = newVertex;
-								newVertex.setFill(Color.DARKRED);
+								// this only kind of works idk
+								// if we dont have anything selected, select this
+								if(startingVertex == null)
+								{
+									startingVertex = newVertex;
+									
+									vertexSelected(startingVertex);
+								}
+								else //if(startEdge != newVertex)
+								{
+									Edge newEdge = new Edge(startingVertex, newVertex, Color.BLACK);
+									
+									newEdge.setOnMouseDragged(event3 -> {
+										newEdge.setControlPoint(event3.getX(), event3.getY());
+									});
+									
+	
+									vertexDeselected(startingVertex);
+									
+									drawingArea.getChildren().add(newEdge);
+									Graph.edges.add(newEdge);
+									
+									// Updating the number of edges and the number of components
+									m.setText("m = " + String.valueOf(Graph.edges.size()));
+									k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
+									startingVertex = null;
+								}
 							}
-							else //if(startEdge != newVertex)
-							{
-								Edge newEdge = new Edge(startingVertex, newVertex, Color.BLACK);
+							else if(button.equals("Paint")) {
 								
-								newEdge.setOnMouseDragged(event3 -> {
-									newEdge.setControlPoint(event3.getX(), event3.getY());
+								vertexSelected(newVertex);
+								
+								Stage colorPickerStage = new Stage();
+								// Set the default selected color to be the current color of the newVertex
+								ColorPicker colorPicker = new ColorPicker((Color) newVertex.getFill());
+								
+								// Show the color palette selector dialog
+								colorPicker.setOnAction(colorEvent -> {
+								    Color selectedColor = colorPicker.getValue();
+								    
+							    	// Set the fill color of the newVertex
+							        newVertex.setFill(selectedColor);
+							        vertexDeselected(newVertex);
 								});
 								
-								drawingArea.getChildren().add(newEdge);
-								newVertex.setFill(Color.BLUE);
-								Graph.edges.add(newEdge);
-								m.setText("m = " + String.valueOf(Graph.edges.size()));
-								k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
-								startingVertex = null;
+								// When the color picker stage closes
+								colorPickerStage.setOnHidden(hiddenEvent -> {
+						            
+									 vertexDeselected(newVertex);
+						        });
+								
+								    
+								// Create a new Stage to show the ColorPicker
+								colorPickerStage.setScene(new Scene(colorPicker));
+								colorPickerStage.setTitle("Choose Color");
+								colorPickerStage.show();
+								
+								// Close the colorPickerStage automatically when the button changes
+				                toggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+				                    if (newToggle != null) {
+				                        colorPickerStage.hide();
+				                    }
+				                });
 							}
-						}
-			        });
-
-			        n.setText("n = " + String.valueOf(Graph.vertices.size()));
-			        drawingArea.getChildren().add(newVertex);
-			    }
+							else if(button.equals("Remove")) {
+								
+							}
+				        });
+				        
+				        // Updating the number of vertex in graph
+				        n.setText("n = " + String.valueOf(Graph.vertices.size()));
+				        drawingArea.getChildren().add(newVertex);
+				    }
+				}
 			});
 
 	        // Set up the stage
@@ -161,4 +223,17 @@ public class Main extends Application {
 		launch(args);
 	}
 	
+	// Adds yellow highlight to a vertex when selected
+	public void vertexSelected(Vertex currentVertex) {
+		
+		currentVertex.setStroke(Color.YELLOW);
+		currentVertex.setStrokeWidth(5);
+		currentVertex.setStrokeType(StrokeType.OUTSIDE);
+	}
+	
+	// Gets rid of highlight when vertex is deselected
+	public void vertexDeselected(Vertex currentVertex) {
+		
+		currentVertex.setStroke(Color.TRANSPARENT);
+	}
 }
