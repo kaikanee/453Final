@@ -33,6 +33,53 @@ public class graphController {
 		this.edges.add(edge);
 		return edge;
 	}
+	
+	// Remove a vertex and all incident vertices.
+	public ArrayList<Edge> removeVertex(Vertex vertex) {
+		HashSet<Vertex> adjacentVertices = new HashSet<>();
+		ArrayList<Edge> incidentEdges = new ArrayList<>();
+		
+		adjacentVertices = vertex.getAdjacentVertices();
+		incidentEdges = vertex.getIncidentEdges();
+		
+		
+		for (Vertex ver: adjacentVertices) {
+			
+			ver.removeEdge(incidentEdges);
+		}
+		
+		this.edges.removeAll(incidentEdges);
+		this.vertices.remove(vertex);
+		
+		return incidentEdges;
+	}
+	
+	// removes a single edge
+	public void removeEdge(Edge currentEdge) {
+		Vertex[] endPoints;
+		
+		endPoints = currentEdge.getEndpoints();
+		
+		// if its a loop edge
+		if (endPoints[0].equals(endPoints[1])) {
+			
+			endPoints[0].removeEdge(currentEdge);
+		}
+		else {
+			// remove from adjacent vertices.
+			for (Vertex vertex : endPoints) {
+				
+				vertex.removeEdge(currentEdge);
+			}
+		}
+		
+		this.edges.remove(currentEdge);
+	}
+	
+	public int getDegree(Vertex vertex) {;
+		
+		return vertex.getDegree();
+	}
 
 	public Color getDefaultColor() {
 		return defaultColor;

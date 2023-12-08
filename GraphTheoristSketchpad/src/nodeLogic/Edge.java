@@ -37,8 +37,15 @@ public class Edge extends Path{
 		this.getElements().add(endPath);
 		
 		this.setStrokeWidth(5);
-		start.addEdge(this);
-		end.addEdge(this);
+		
+		if (start.equals(end)) {
+			start.addEdge(this);
+		}
+		else {
+			
+			start.addEdge(this);
+			end.addEdge(this);
+		}
 	}
 	
 	public Vertex[] getEndpoints()
@@ -63,15 +70,11 @@ public class Edge extends Path{
 		{
 			this.startPath.setX(vertex.getCenterX());
 			this.startPath.setY(vertex.getCenterY());
-			//endPath.setControlX(endpoints[0].getCenterX() - controlOffsetX);
-			//endPath.setControlY(endpoints[0].getCenterY() - controlOffsetY);
 		}
 		else
 		{
 			this.endPath.setX(vertex.getCenterX());
 			this.endPath.setY(vertex.getCenterY());
-			//endPath.setControlX(endpoints[0].getCenterX() - controlOffsetX);
-			//endPath.setControlY(endpoints[0].getCenterY() - controlOffsetY);
 		}
 	}
 

@@ -10,23 +10,36 @@ public class Vertex extends Circle{
 	
 	public double x, y;
 	private final static int SIZE = 25;
-	private ArrayList<Edge> edges = new ArrayList<Edge>();
+	private ArrayList<Edge> incidentEdges = new ArrayList<Edge>();
 	
 	public Vertex(double x, double y, Color color)
 	{
 		super(x,y,SIZE, color);
 	}
 	
+	// adds incident edge
 	public void addEdge(Edge edge)
 	{
-		this.edges.add(edge);
+		this.incidentEdges.add(edge);
+	}
+	
+	// removes incident edge
+	public void removeEdge(Edge removedEdge) {
+		
+		this.incidentEdges.remove(removedEdge);
+	}
+	
+	// removes all incident edges shared with a vertex.
+	public void removeEdge(ArrayList<Edge> remEdges) {
+		
+		this.incidentEdges.removeAll(remEdges);
 	}
 	
 	//returns an array of all unique adjacent nodes
 	public HashSet<Vertex> getAdjacentVertices() {
 		
 	    HashSet<Vertex> adjacentVertices = new HashSet<>();
-	    for (Edge edge : edges) {
+	    for (Edge edge : this.incidentEdges) {
 	    	
 	        for (Vertex node : edge.getEndpoints()) {
 	            if (!node.equals(this)) {
@@ -37,15 +50,22 @@ public class Vertex extends Circle{
 	    return adjacentVertices;
 	}
 	
-	public int getDegree()
-	{
-		// need to account for loops, just go through edges and check if both endpoints are the same as this,
-		return this.edges.size();
+	// getter for incident edges
+	public ArrayList<Edge> getIncidentEdges(){
+		
+		return this.incidentEdges;
 	}
 	
+	// gets the degree of this vertex
+	public int getDegree()
+	{
+		return this.incidentEdges.size();
+	}
+	
+	// handles the event of a moved vertex.
 	public void vertexMoved()
 	{
-		for(Edge edge : this.edges)
+		for(Edge edge : this.incidentEdges)
 		{
 			edge.handleVertexEvent(this);
 		}

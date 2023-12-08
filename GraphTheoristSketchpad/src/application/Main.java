@@ -3,6 +3,9 @@ package application;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
+
+import java.util.ArrayList;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -29,8 +32,6 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-
-			// Test code
 			Label label = new Label("Drawable Surface");
 			Pane drawingArea = new Pane(label);
 			ToggleButton addVertex = new ToggleButton("Vertex");
@@ -48,6 +49,7 @@ public class Main extends Application {
 			Text n = new Text("n = 0");
 			Text m = new Text("m = 0");
 			Text k = new Text("k = 0");
+			Text v = new Text("v = 0");
 			
 			// making the buttons a group so only one of them can be pressed at any time
 			addVertex.setToggleGroup(toggleGroup);
@@ -59,7 +61,7 @@ public class Main extends Application {
 			toggleGroup.selectToggle(addVertex);
 			
 			// adding the buttons and text to the vertical box.
-			buttonsVBox = new VBox(10, n, m, k, addVertex, addEdge, paint, remove);
+			buttonsVBox = new VBox(10, n, m, k, v, addVertex, addEdge, paint, remove);
 			
 			// adding padding to the vertical box
 			vBoxPadding = new Insets(0, 0, 0, 20); // Insets(top, right, bottom, left)
@@ -104,7 +106,7 @@ public class Main extends Application {
 			    }
 			});
 			
-			// Set the double-click event handler
+			// Set the double-click event handler.
 			drawingArea.setOnMouseClicked(event -> {
 				if(button != null) {
 					
@@ -131,17 +133,26 @@ public class Main extends Application {
 				        
 				        // adding a new edge
 				        newVertex.setOnMouseClicked(edgeEvent -> {
-							if(button.equals("Edge"))
+				        	if (button.equals("Vertex") && edgeEvent.getClickCount() != 2) {
+				        		// Allows selection of a vertex to show the degree of the current vertex.
+				        		vertexSelected(newVertex);
+				        		v.setText("v = " + String.valueOf(Graph.getDegree(newVertex)));
+				        		if (startingVertex != null && !startingVertex.equals(newVertex)) {
+				        			
+				        			vertexDeselected(startingVertex);
+				        		}
+				        		startingVertex = newVertex;
+				        	}
+				        	else if(button.equals("Edge"))
 							{
-								// this only kind of works idk
-								// if we dont have anything selected, select this
+								// if we don't have anything selected, select this
 								if(startingVertex == null)
 								{
 									startingVertex = newVertex;
 									
 									vertexSelected(startingVertex);
 								}
-								else //if(startEdge != newVertex)
+								else
 								{
 									Edge newEdge = new Edge(startingVertex, newVertex, Color.BLACK);
 									
@@ -149,7 +160,52 @@ public class Main extends Application {
 										newEdge.setControlPoint(event3.getX(), event3.getY());
 									});
 									
-	
+									// adding event to edge
+									newEdge.setOnMouseClicked(event4 -> {
+										
+										if(button.equals("Paint")) {
+											
+											edgeSelected(newEdge);
+											
+											Stage colorPickerStage = new Stage();
+											// Set the default selected color to be the current color of the newVertex
+											ColorPicker colorPicker = new ColorPicker((Color) newEdge.getFill());
+											
+											// Show the color palette selector dialog
+											colorPicker.setOnAction(colorEvent -> {
+											    Color selectedColor = colorPicker.getValue();
+											    
+										    	// Set the fill color of the newVertex
+										        newEdge.setFill(selectedColor);
+										        edgeDeselected(newEdge);
+											});
+											
+											// When the color picker stage closes
+											colorPickerStage.setOnHidden(hiddenEvent -> {
+									            
+												 edgeDeselected(newEdge);
+									        });
+											
+											    
+											// Create a new Stage to show the ColorPicker
+											colorPickerStage.setScene(new Scene(colorPicker));
+											colorPickerStage.setTitle("Choose Color");
+											colorPickerStage.show();
+											
+											// Close the colorPickerStage automatically when the button changes
+							                toggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+							                    if (newToggle != null) {
+							                        colorPickerStage.hide();
+							                    }
+							                });
+										}
+										else if(button.equals("Remove")) {
+										
+											Graph.removeEdge(newEdge);
+											drawingArea.getChildren().remove(newEdge);
+										}
+									});
+									
 									vertexDeselected(startingVertex);
 									
 									drawingArea.getChildren().add(newEdge);
@@ -198,6 +254,13 @@ public class Main extends Application {
 				                });
 							}
 							else if(button.equals("Remove")) {
+								ArrayList<Edge> incidentEdges = new ArrayList<>();
+								// gets all the incident edges
+								incidentEdges = Graph.removeVertex(newVertex);
+								
+								// Remove the vertex and incident edges from drawing area.
+								drawingArea.getChildren().remove(newVertex);
+								drawingArea.getChildren().removeAll(incidentEdges);
 								
 							}
 				        });
@@ -208,7 +271,7 @@ public class Main extends Application {
 				    }
 				}
 			});
-
+			
 	        // Set up the stage
 	        primaryStage.setTitle("Graph Maker");
 	        primaryStage.setScene(scene);
@@ -231,9 +294,22 @@ public class Main extends Application {
 		currentVertex.setStrokeType(StrokeType.OUTSIDE);
 	}
 	
-	// Gets rid of highlight when vertex is deselected
+	// Gets rid of highlight when vertex is unselected
 	public void vertexDeselected(Vertex currentVertex) {
 		
 		currentVertex.setStroke(Color.TRANSPARENT);
+	}
+	
+	// same as above for edges
+	public void edgeSelected (Edge currentEdge) {
+		
+		currentEdge.setStroke(Color.YELLOW);
+		currentEdge.setStrokeWidth(5);
+		currentEdge.setStrokeType(StrokeType.OUTSIDE);
+	}
+	
+	public void edgeDeselected (Edge currentEdge) {
+		
+		currentEdge.setStroke(Color.TRANSPARENT);
 	}
 }
