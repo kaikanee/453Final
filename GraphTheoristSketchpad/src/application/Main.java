@@ -176,7 +176,7 @@ public class Main extends Application {
 											    Color selectedColor = colorPicker.getValue();
 											    
 										    	// Set the fill color of the newVertex
-										        newEdge.setFill(selectedColor);
+										        newEdge.setStroke(selectedColor);
 										        edgeDeselected(newEdge);
 											});
 											
@@ -203,6 +203,10 @@ public class Main extends Application {
 										
 											Graph.removeEdge(newEdge);
 											drawingArea.getChildren().remove(newEdge);
+											
+											// updating the number of edges and components there are
+											m.setText("m = " + String.valueOf(Graph.edges.size()));
+											k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
 										}
 									});
 									
@@ -262,6 +266,10 @@ public class Main extends Application {
 								drawingArea.getChildren().remove(newVertex);
 								drawingArea.getChildren().removeAll(incidentEdges);
 								
+								// Update amount of vertices, edges, and components there are.
+								n.setText("n = " + String.valueOf(Graph.vertices.size()));
+								m.setText("m = " + String.valueOf(Graph.edges.size()));
+								k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
 							}
 				        });
 				        
@@ -310,6 +318,6 @@ public class Main extends Application {
 	
 	public void edgeDeselected (Edge currentEdge) {
 		
-		currentEdge.setStroke(Color.TRANSPARENT);
+		currentEdge.setStroke(currentEdge.getStroke());
 	}
 }
