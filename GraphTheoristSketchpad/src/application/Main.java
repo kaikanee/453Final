@@ -119,6 +119,8 @@ public class Main extends Application {
 				        Vertex newVertex = new Vertex(x,y, Color.BLACK);
 				        
 				        Graph.addVertex(newVertex);
+				        
+
 				        k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
 				        
 				        // drag and drop the vertex only when the vertex button is chosen
@@ -217,10 +219,13 @@ public class Main extends Application {
 									
 									Graph.edges.add(newEdge);
 									
+									
 									// Updating the number of edges and the number of components
 									m.setText("m = " + String.valueOf(Graph.edges.size()));
 									k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
 									startingVertex = null;
+									
+									
 								}
 							}
 							else if(button.equals("Paint")) {

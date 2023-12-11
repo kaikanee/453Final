@@ -44,7 +44,7 @@ public class Edge extends Path{
 			}
 			else
 			{
-				double random = Math.random() * ((150 - 1) + 1) + 1;
+				double random = Math.random() * ((25 - 1) + 1) + 1;
 				if((int)random > 75)
 				{
 					random *= -1.0;

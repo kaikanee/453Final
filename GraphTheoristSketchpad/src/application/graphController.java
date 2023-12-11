@@ -3,7 +3,9 @@ package application;
 
 import javafx.scene.paint.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Stack;
 
 import nodeLogic.Edge;
@@ -127,19 +129,80 @@ public class graphController {
         }
 	}
 	
+	
+	
+	
+	// DO NOT USE THIS FOR NOW!!! DONT!!!
+	//attempt to color the graph using DFS
+	public Boolean isBipartite()
+	{
+		if(this.vertices.size() == 0 || this.edges.size() == 0)
+		{
+			return true;
+		}
+		int[][] adjacencyMatrix = this.calculateAdjacencyMatrix();
+		int colorArr[] = new int[this.vertices.size()];
+		Arrays.fill(colorArr, -1);
+		colorArr[0] = 1;
+		LinkedList<Integer> queue = new LinkedList<Integer>();
+		queue.add(0);
+		
+		while(!queue.isEmpty())
+		{
+			int u = queue.poll();
+			if(adjacencyMatrix[u][u] == 1)
+			{
+				return false; //on a self loop
+			}
+			
+			for(int i = 0; i < this.vertices.size(); ++i)
+			{
+				if(adjacencyMatrix[u][i] == 1 && colorArr[i] == -1)
+				{
+					queue.add(i);
+				}
+				else if(adjacencyMatrix[u][i] == 1 && colorArr[i] == colorArr[u])
+				{
+					return false;
+				}
+			}
+			
+		}
+		return true;
+		
+	}
+	
+	
+	
+	
 	// returns 2d adjacency matrix
 	public int[][] calculateAdjacencyMatrix()
 	{
-		//each row is a vertex, every column is an edge
-		int[][] matrix = new int[this.vertices.size()][this.edges.size()];
+		//each row is a vertex, every column is the vertex it is adjacent to
+		int[][] matrix = new int[this.vertices.size()][this.vertices.size()];
 		
 		for(Edge edge : this.edges)
 		{
-			matrix[this.vertices.indexOf((edge.getEndpoints()[0]))][this.edges.indexOf(edge)] = 1;
-			matrix[this.vertices.indexOf((edge.getEndpoints()[1]))][this.edges.indexOf(edge)] = 1;
+			matrix[this.vertices.indexOf((edge.getEndpoints()[0]))][this.vertices.indexOf((edge.getEndpoints()[1]))] = 1;
+			matrix[this.vertices.indexOf((edge.getEndpoints()[1]))][this.vertices.indexOf((edge.getEndpoints()[0]))] = 1;
 		}
 		
 		return matrix;
 	}
+	
+	public int[][] calculateIncidenceMatrix()
+	{
+		int[][] matrix = new int[this.vertices.size()][this.edges.size()];
+		
+		for(int i = 0; i < this.edges.size(); i++)
+		{
+			Edge curr = this.edges.get(i);
+			matrix[this.vertices.indexOf(curr.getEndpoints()[0])][i] = 1;
+			matrix[this.vertices.indexOf(curr.getEndpoints()[1])][i] = 1;
+		}
+		return matrix;
+	}
+	
+	
 	
 }
