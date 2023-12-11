@@ -127,4 +127,19 @@ public class graphController {
         }
 	}
 	
+	// returns 2d adjacency matrix
+	public int[][] calculateAdjacencyMatrix()
+	{
+		//each row is a vertex, every column is an edge
+		int[][] matrix = new int[this.vertices.size()][this.edges.size()];
+		
+		for(Edge edge : this.edges)
+		{
+			matrix[this.vertices.indexOf((edge.getEndpoints()[0]))][this.edges.indexOf(edge)] = 1;
+			matrix[this.vertices.indexOf((edge.getEndpoints()[1]))][this.edges.indexOf(edge)] = 1;
+		}
+		
+		return matrix;
+	}
+	
 }

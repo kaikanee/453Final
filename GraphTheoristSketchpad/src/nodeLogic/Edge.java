@@ -12,7 +12,8 @@ public class Edge extends Path{
 	private Vertex[] endpoints = new Vertex[2];
 	private MoveTo startPath;
 	private QuadCurveTo endPath;
-	private ArcTo selfLoopArc;
+	private ArcTo dragCircle;
+
 
 	public Edge(Vertex start, Vertex end, Color color)
 	{
@@ -22,34 +23,36 @@ public class Edge extends Path{
 		this.setStrokeWidth(5);
 		
 		// Deals with self loops
-		if (start.equals(end)) {
-			
-			// Self-loop
-            double radiusX = 15;
-            double radiusY = 20; 
-
-            this.startPath = new MoveTo(endpoints[0].getCenterX() - radiusX, endpoints[0].getCenterY() - radiusY);
-            this.selfLoopArc = new ArcTo(radiusX, radiusY, 0, endpoints[0].getCenterX() + radiusX, endpoints[0].getCenterY() - radiusY, false, true);
-
-            this.getElements().add(startPath);
-            this.getElements().add(selfLoopArc);
-
-            start.addEdge(this);
-		}
-		else {
+		
 			
 			this.startPath = new MoveTo(endpoints[0].getCenterX(), endpoints[0].getCenterY());
 			this.endPath = new QuadCurveTo();
+			
 			endPath.setX(endpoints[1].getCenterX());
 			endPath.setY(endpoints[1].getCenterY());
 			
-			double random = Math.random() * ((150 - 1) + 1) + 1;
-			if((int)random > 75)
+			// jank 
+			double controlX, controlY;
+			if(start.equals(end))
 			{
-				random *= -1.0;
+				this.endPath.setX(startPath.getX() - 23);
+				this.startPath.setX(startPath.getX() + 23);
+				
+				controlX = endpoints[1].getCenterX();
+				controlY = endpoints[1].getCenterY() -75;
+				System.out.println("Self loop");
 			}
-			double controlX = (endpoints[1].getCenterX() + endpoints[0].getCenterX()) / 2 + random;
-			double controlY = (endpoints[1].getCenterY() + endpoints[0].getCenterY()) / 2 + random;
+			else
+			{
+				double random = Math.random() * ((150 - 1) + 1) + 1;
+				if((int)random > 75)
+				{
+					random *= -1.0;
+				}
+				controlX = (endpoints[1].getCenterX() + endpoints[0].getCenterX()) / 2 + random;
+				controlY = (endpoints[1].getCenterY() + endpoints[0].getCenterY()) / 2 + random;
+			}
+			
 			this.setControlPoint(controlX, controlY);
 			
 			
@@ -59,7 +62,7 @@ public class Edge extends Path{
 			
 			start.addEdge(this);
 			end.addEdge(this);
-		}
+		
 	}
 	
 	public Vertex[] getEndpoints()
@@ -69,16 +72,16 @@ public class Edge extends Path{
 	
 	public void setControlPoint(double x, double y)
 	{
-		this.endPath.setControlX(x);
-		this.endPath.setControlY(y);
+		double pointx, pointy;
+		pointx = 2* x - .5 * (this.startPath.getX() + this.endPath.getX());
+		pointy = 2* y - .5 * (this.startPath.getY() + this.endPath.getY());
+		this.endPath.setControlX(pointx);
+		this.endPath.setControlY(pointy);
 	}
 
 	public void handleVertexEvent(Vertex vertex)
 	{
-		double controlOffsetX = Math.abs(startPath.getX() - this.endPath.getControlX());
-		double controlOffsetY = Math.abs(startPath.getY() - this.endPath.getControlY());
-		
-		System.out.println(controlOffsetX + " " + controlOffsetY);
+
 		if(this.endpoints[0] == vertex)
 		{
 			this.startPath.setX(vertex.getCenterX());

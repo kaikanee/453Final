@@ -129,6 +129,7 @@ public class Main extends Application {
 					        	newVertex.setCenterY(event2.getY());
 					        	newVertex.vertexMoved();
 				        	}
+				        	
 				        });
 				        
 				        // adding a new edge
@@ -213,6 +214,7 @@ public class Main extends Application {
 									vertexDeselected(startingVertex);
 									
 									drawingArea.getChildren().add(newEdge);
+									
 									Graph.edges.add(newEdge);
 									
 									// Updating the number of edges and the number of components
