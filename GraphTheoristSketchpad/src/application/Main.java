@@ -1,26 +1,28 @@
 package application;
 	
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.VBox;
-
 import java.util.ArrayList;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import nodeLogic.Edge;
 import nodeLogic.Vertex;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.ColorPicker;
 
 
 public class Main extends Application {
@@ -32,12 +34,14 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			Label label = new Label("Drawable Surface");
-			Pane drawingArea = new Pane(label);
+			
+			Pane drawingArea = new Pane();
 			ToggleButton addVertex = new ToggleButton("Vertex");
 			ToggleButton addEdge = new ToggleButton("Edge");
 			ToggleButton paint = new ToggleButton("Paint");
 			ToggleButton remove = new ToggleButton("Remove");
+			Button stats = new Button("Stats");
+			stats.setOnAction(e -> openHeuristics(primaryStage));
 			ToggleGroup toggleGroup = new ToggleGroup();
 			Scene scene;
 			VBox buttonsVBox;
@@ -61,7 +65,7 @@ public class Main extends Application {
 			toggleGroup.selectToggle(addVertex);
 			
 			// adding the buttons and text to the vertical box.
-			buttonsVBox = new VBox(10, n, m, k, v, addVertex, addEdge, paint, remove);
+			buttonsVBox = new VBox(10, n, m, k, v, addVertex, addEdge, paint, remove, stats);
 			
 			// adding padding to the vertical box
 			vBoxPadding = new Insets(0, 0, 0, 20); // Insets(top, right, bottom, left)
@@ -159,6 +163,8 @@ public class Main extends Application {
 								{
 									Edge newEdge = new Edge(startingVertex, newVertex, Color.BLACK);
 									
+									
+									
 									newEdge.setOnMouseDragged(event3 -> {
 										newEdge.setControlPoint(event3.getX(), event3.getY());
 									});
@@ -169,7 +175,11 @@ public class Main extends Application {
 										if(button.equals("Paint")) {
 											
 											edgeSelected(newEdge);
-											
+											;
+											for(Vertex vert : newEdge.getEndpoints())
+											{
+												vert.toFront();
+											}
 											Stage colorPickerStage = new Stage();
 											// Set the default selected color to be the current color of the newVertex
 											ColorPicker colorPicker = new ColorPicker((Color) newEdge.getFill());
@@ -220,6 +230,7 @@ public class Main extends Application {
 									Graph.edges.add(newEdge);
 									
 									
+									
 									// Updating the number of edges and the number of components
 									m.setText("m = " + String.valueOf(Graph.edges.size()));
 									k.setText("k = " + String.valueOf(Graph.findConnectedComponents()));
@@ -231,7 +242,7 @@ public class Main extends Application {
 							else if(button.equals("Paint")) {
 								
 								vertexSelected(newVertex);
-								
+								newVertex.toFront();
 								Stage colorPickerStage = new Stage();
 								// Set the default selected color to be the current color of the newVertex
 								ColorPicker colorPicker = new ColorPicker((Color) newVertex.getFill());
@@ -320,11 +331,59 @@ public class Main extends Application {
 		
 		currentEdge.setStroke(Color.YELLOW);
 		currentEdge.setStrokeWidth(5);
-		currentEdge.setStrokeType(StrokeType.OUTSIDE);
+		//currentEdge.setStrokeType(StrokeType.OUTSIDE);
 	}
 	
 	public void edgeDeselected (Edge currentEdge) {
 		
 		currentEdge.setStroke(currentEdge.getStroke());
+	}
+	
+	private void openHeuristics(Stage primaryStage)
+	{
+		Stage newWindow = new Stage();
+		newWindow.setTitle("Graph Heuristics");
+		
+		VBox pane = new VBox();
+		pane.setPadding(new Insets(10));
+		
+		pane.getChildren().add(new Label("Incidence Matrix: "));
+		pane.getChildren().add(new Text(matrixToString(Graph.calculateIncidenceMatrix())));
+		pane.getChildren().add(new Label("Adjacency Matrix: "));
+		pane.getChildren().add(new Text(matrixToString(Graph.calculateAdjacencyMatrix())));
+		
+
+		if(Graph.isBipartite())
+		{
+			pane.getChildren().add(new Label("The graph is bipartite."));
+			
+		}
+		else
+		{
+			pane.getChildren().add(new Label("The graph is not bipartite."));
+		}
+		
+		
+		
+		Scene scene = new Scene(pane, 350, this.Graph.vertices.size()*30 + 150);
+		
+		newWindow.initModality(Modality.WINDOW_MODAL);
+		newWindow.initOwner(primaryStage);
+		newWindow.setScene(scene);
+		newWindow.show();
+	
+		
+	}
+	
+	private static String matrixToString(int[][] matrix)
+	{
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                sb.append(matrix[i][j]).append(" ");
+            }
+            sb.append("\n");
+		}
+		return sb.toString();
 	}
 }

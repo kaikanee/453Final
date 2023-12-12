@@ -33,6 +33,7 @@ public class graphController {
 	{
 		Edge edge = new Edge(start, end, getDefaultColor());
 		this.edges.add(edge);
+		System.out.println(this.isBipartite());
 		return edge;
 	}
 	
@@ -140,36 +141,53 @@ public class graphController {
 		{
 			return true;
 		}
-		int[][] adjacencyMatrix = this.calculateAdjacencyMatrix();
-		int colorArr[] = new int[this.vertices.size()];
-		Arrays.fill(colorArr, -1);
-		colorArr[0] = 1;
-		LinkedList<Integer> queue = new LinkedList<Integer>();
-		queue.add(0);
 		
-		while(!queue.isEmpty())
+		int colorArr[] = new int[this.vertices.size()];
+		for (int i = 0; i < this.vertices.size(); ++i)
 		{
-			int u = queue.poll();
-			if(adjacencyMatrix[u][u] == 1)
+			colorArr[i] = -1; //Arrays.fill
+		}
+		
+		for(int i = 0; i < this.vertices.size(); i++)
+		{
+			if(colorArr[i] == -1)
 			{
-				return false; //on a self loop
-			}
-			
-			for(int i = 0; i < this.vertices.size(); ++i)
-			{
-				if(adjacencyMatrix[u][i] == 1 && colorArr[i] == -1)
-				{
-					queue.add(i);
-				}
-				else if(adjacencyMatrix[u][i] == 1 && colorArr[i] == colorArr[u])
+				if(bipartiteUtil(this.calculateAdjacencyMatrix(), i, colorArr) == false)
 				{
 					return false;
 				}
 			}
-			
 		}
 		return true;
+
 		
+	}
+	
+	public Boolean bipartiteUtil(int adjMat[][], int source, int colorArr[])
+	{
+		colorArr[source] = 1;
+		LinkedList<Integer> q = new LinkedList<Integer>();
+		q.add(source);
+		while(!q.isEmpty())
+		{
+			int u = q.getFirst();
+			q.pop();
+			
+			if(adjMat[u][u] == 1)
+			{
+				return false;
+			}
+			for(int v = 0; v < this.vertices.size(); ++v)
+			{
+				if(adjMat[u][v] == 1 && colorArr[v] == -1)
+				{
+					colorArr[v] = 1 - colorArr[u];
+					q.push(v);
+				}
+				else if(adjMat[u][v] == 1 && colorArr[v] == colorArr[u]) return false;
+			}
+		}
+		return true;
 	}
 	
 	

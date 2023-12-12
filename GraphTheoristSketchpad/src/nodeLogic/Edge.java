@@ -12,14 +12,15 @@ public class Edge extends Path{
 	private Vertex[] endpoints = new Vertex[2];
 	private MoveTo startPath;
 	private QuadCurveTo endPath;
-	private ArcTo dragCircle;
+	
 
 
 	public Edge(Vertex start, Vertex end, Color color)
 	{
+		
 		this.endpoints[0] = start;
 		this.endpoints[1] = end;
-		
+		this.setFill(Color.TRANSPARENT);
 		this.setStrokeWidth(5);
 		
 		// Deals with self loops
@@ -40,7 +41,7 @@ public class Edge extends Path{
 				
 				controlX = endpoints[1].getCenterX();
 				controlY = endpoints[1].getCenterY() -75;
-				System.out.println("Self loop");
+				//System.out.println("Self loop");
 			}
 			else
 			{
@@ -82,7 +83,14 @@ public class Edge extends Path{
 	public void handleVertexEvent(Vertex vertex)
 	{
 
-		if(this.endpoints[0] == vertex)
+		if(this.endpoints[0].equals(this.endpoints[1]))
+		{
+			this.startPath.setX(vertex.getCenterX() - 22);
+			this.startPath.setY(vertex.getCenterY());
+			this.endPath.setX(vertex.getCenterX() + 22);
+			this.endPath.setY(vertex.getCenterY());
+		}
+		else if(this.endpoints[0].equals(vertex))
 		{
 			this.startPath.setX(vertex.getCenterX());
 			this.startPath.setY(vertex.getCenterY());
